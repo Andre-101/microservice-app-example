@@ -8,7 +8,6 @@ on:
 env:
   REGISTRY: ghcr.io
   IMAGE_PREFIX: microapp
-  ENABLE_DEPLOY: "false"
 
 jobs:
   build-and-push:
@@ -76,35 +75,3 @@ jobs:
           push: true
           tags: |
             ${{ env.REGISTRY }}/${{ steps.vars.outputs.owner_lowercase }}/${{ env.IMAGE_PREFIX }}-frontend:latest
-
-  deploy:
-    needs: build-and-push
-    runs-on: ubuntu-latest
-    if: ${{ (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master') && env.ENABLE_DEPLOY == 'true' }}
-    permissions:
-      contents: read
-    env:
-      KUBECONFIG_FILE: ./kubeconfig
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup kubectl
-        uses: azure/setup-kubectl@v4
-        with:
-          version: "v1.30.0"
-
-      - name: Write kubeconfig from secret
-        run: |
-          echo "${{ secrets.KUBECONFIG_CONTENTS }}" > $KUBECONFIG_FILE
-          chmod 600 $KUBECONFIG_FILE
-        shell: bash
-
-      - name: Apply manifests
-        env:
-          KUBECONFIG: ${{ env.KUBECONFIG_FILE }}
-        run: |
-          kubectl apply --validate=false -f infra/k8s/base/
-          kubectl apply --validate=false -f infra/k8s/app/
-          kubectl apply --validate=false -f infra/k8s/app/hpa/
-        shell: bash
