@@ -1,0 +1,105 @@
+name: CI/CD - Microservice App
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  workflow_dispatch:
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_PREFIX: microapp
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push auth-api
+        uses: docker/build-push-action@v6
+        with:
+          context: ./auth-api
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.IMAGE_PREFIX }}-auth-api:latest
+
+      - name: Build and push todos-api
+        uses: docker/build-push-action@v6
+        with:
+          context: ./todos-api
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.IMAGE_PREFIX }}-todos-api:latest
+
+      - name: Build and push users-api
+        uses: docker/build-push-action@v6
+        with:
+          context: ./users-api
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.IMAGE_PREFIX }}-users-api:latest
+
+      - name: Build and push log-message-processor
+        uses: docker/build-push-action@v6
+        with:
+          context: ./log-message-processor
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.IMAGE_PREFIX }}-log-message-processor:latest
+
+      - name: Build and push frontend
+        uses: docker/build-push-action@v6
+        with:
+          context: ./frontend
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.IMAGE_PREFIX }}-frontend:latest
+
+  deploy:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+    permissions:
+      contents: read
+    env:
+      KUBECONFIG_FILE: ./kubeconfig
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup kubectl
+        uses: azure/setup-kubectl@v4
+        with:
+          version: "v1.30.0"
+
+      - name: Write kubeconfig from secret
+        run: |
+          echo "${{ secrets.KUBECONFIG_CONTENTS }}" > $KUBECONFIG_FILE
+          chmod 600 $KUBECONFIG_FILE
+        shell: bash
+
+      - name: Apply manifests
+        env:
+          KUBECONFIG: ${{ env.KUBECONFIG_FILE }}
+        run: |
+          kubectl apply -f infra/k8s/base/
+          kubectl apply -f infra/k8s/app/
+          kubectl apply -f infra/k8s/app/hpa/
+        shell: bash

@@ -1,30 +1,29 @@
 {
-  "name": "microservice-k8s",
+  "name": "Microservice App - K8s + kind",
   "image": "mcr.microsoft.com/devcontainers/base:ubuntu",
-
   "features": {
-    "ghcr.io/devcontainers/features/docker-in-docker:2": {},
-    "ghcr.io/devcontainers/features/node:1": { "version": "lts" },
-    "ghcr.io/devcontainers/features/python:1": { "version": "3.11" },
-    "ghcr.io/devcontainers/features/go:1": { "version": "1.22" }
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {
+      "version": "latest"
+    }
   },
-
-  "postCreateCommand": "bash .devcontainer/setup.sh",
-
-  "forwardPorts": [3000, 3001, 8000, 8080, 8081],
-
+  "forwardPorts": [8080, 8000, 8082, 8083, 3000],
   "customizations": {
     "vscode": {
       "settings": {
-        "editor.formatOnSave": true
+        "terminal.integrated.defaultProfile.linux": "bash"
       },
       "extensions": [
         "ms-azuretools.vscode-docker",
-        "github.vscode-github-actions",
-        "redhat.vscode-yaml",
         "ms-kubernetes-tools.vscode-kubernetes-tools",
-        "esbenp.prettier-vscode"
+        "ms-vscode.makefile-tools",
+        "redhat.vscode-yaml"
       ]
     }
-  }
+  },
+  "remoteUser": "vscode",
+  "runArgs": [
+    "--init",
+    "--privileged"
+  ],
+  "postCreateCommand": "bash .devcontainer/post-create.sh"
 }

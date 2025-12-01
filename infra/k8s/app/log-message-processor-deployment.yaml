@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: log-message-processor
+  namespace: microapp
+  labels:
+    app: log-message-processor
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: log-message-processor
+  template:
+    metadata:
+      labels:
+        app: log-message-processor
+    spec:
+      containers:
+        - name: log-message-processor
+          image: ghcr.io/andre-101/microapp-log-message-processor:latest
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: REDIS_HOST
+              value: "redis"
+            - name: REDIS_PORT
+              value: "6379"
+            - name: REDIS_CHANNEL
+              value: "log_channel"
+          resources:
+            requests:
+              cpu: "50m"
+              memory: "64Mi"
+            limits:
+              cpu: "200m"
+              memory: "256Mi"

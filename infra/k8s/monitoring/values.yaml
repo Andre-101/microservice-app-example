@@ -1,0 +1,21 @@
+grafana:
+  adminUser: admin
+  adminPassword: admin
+  service:
+    type: ClusterIP
+    port: 80
+  ingress:
+    enabled: false
+
+prometheus:
+  service:
+    type: ClusterIP
+
+kubeControllerManager:
+  enabled: false
+kubeScheduler:
+  enabled: false
+kubeProxy:
+  enabled: false
+kubeEtcd:
+  enabled: false

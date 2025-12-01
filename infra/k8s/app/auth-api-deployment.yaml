@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: auth-api
+  namespace: microapp
+  labels:
+    app: auth-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: auth-api
+  template:
+    metadata:
+      labels:
+        app: auth-api
+    spec:
+      containers:
+        - name: auth-api
+          image: ghcr.io/andre-101/microapp-auth-api:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8000
+          env:
+            - name: AUTH_API_PORT
+              value: "8000"
+            - name: USERS_API_ADDRESS
+              value: "http://users-api:8083"
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: microapp-secrets
+                  key: JWT_SECRET
+          resources:
+            requests:
+              cpu: "50m"
+              memory: "128Mi"
+            limits:
+              cpu: "300m"
+              memory: "512Mi"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: auth-api
+  namespace: microapp
+spec:
+  selector:
+    app: auth-api
+  ports:
+    - name: http
+      port: 8000
+      targetPort: 8000
