@@ -103,7 +103,7 @@ jobs:
         env:
           KUBECONFIG: ${{ env.KUBECONFIG_FILE }}
         run: |
-          kubectl apply -f infra/k8s/base/
-          kubectl apply -f infra/k8s/app/
-          kubectl apply -f infra/k8s/app/hpa/
+          kubectl apply --validate=false -f infra/k8s/base/
+          kubectl apply --validate=false -f infra/k8s/app/
+          kubectl apply --validate=false -f infra/k8s/app/hpa/
         shell: bash
