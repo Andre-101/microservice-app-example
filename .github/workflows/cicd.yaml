@@ -38,7 +38,7 @@ jobs:
           context: ./auth-api
           push: true
           tags: |
-            ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.IMAGE_PREFIX }}-auth-api:latest
+            ${{ env.REGISTRY }}/${{ toLower(github.repository_owner }}/${{ env.IMAGE_PREFIX }}-auth-api:latest
 
       - name: Build and push todos-api
         uses: docker/build-push-action@v6
@@ -46,7 +46,7 @@ jobs:
           context: ./todos-api
           push: true
           tags: |
-            ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.IMAGE_PREFIX }}-todos-api:latest
+            ${{ env.REGISTRY }}/${{ toLower(github.repository_owner }}/${{ env.IMAGE_PREFIX }}-todos-api:latest
 
       - name: Build and push users-api
         uses: docker/build-push-action@v6
@@ -54,7 +54,7 @@ jobs:
           context: ./users-api
           push: true
           tags: |
-            ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.IMAGE_PREFIX }}-users-api:latest
+            ${{ env.REGISTRY }}/${{ toLower(github.repository_owner }}/${{ env.IMAGE_PREFIX }}-users-api:latest
 
       - name: Build and push log-message-processor
         uses: docker/build-push-action@v6
@@ -62,7 +62,7 @@ jobs:
           context: ./log-message-processor
           push: true
           tags: |
-            ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.IMAGE_PREFIX }}-log-message-processor:latest
+            ${{ env.REGISTRY }}/${{ toLower(github.repository_owner }}/${{ env.IMAGE_PREFIX }}-log-message-processor:latest
 
       - name: Build and push frontend
         uses: docker/build-push-action@v6
@@ -70,7 +70,7 @@ jobs:
           context: ./frontend
           push: true
           tags: |
-            ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.IMAGE_PREFIX }}-frontend:latest
+            ${{ env.REGISTRY }}/${{ toLower(github.repository_owner }}/${{ env.IMAGE_PREFIX }}-frontend:latest
 
   deploy:
     needs: build-and-push
