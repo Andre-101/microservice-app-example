@@ -8,6 +8,7 @@ on:
 env:
   REGISTRY: ghcr.io
   IMAGE_PREFIX: microapp
+  ENABLE_DEPLOY: "false"
 
 jobs:
   build-and-push:
@@ -79,10 +80,7 @@ jobs:
   deploy:
     needs: build-and-push
     runs-on: ubuntu-latest
-    # Solo intenta desplegar si:
-    # - estamos en main/master
-    # - y HAY un kubeconfig configurado en los secrets
-    if: (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master') && secrets.KUBECONFIG_CONTENTS != ''
+    if: ${{ (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master') && env.ENABLE_DEPLOY == 'true' }}
     permissions:
       contents: read
     env:
